@@ -1,0 +1,137 @@
+/* 1. 全域重設 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #fff;
+    width: 100%;
+}
+
+/* 2. 頁首與頁尾外層背景 */
+header, footer {
+    width: 100%;
+    background-color: antiquewhite;
+}
+
+header img {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 3. 頁尾定位設定 */
+.footer-container {
+    position: relative; /* 定位基準點 */
+    width: 100%;
+    margin: 0 auto;
+}
+
+.footer-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 壓在白框上的文字區塊 */
+.footer-text {
+    position: absolute;
+    top: 45%;
+    left: 62%;             /* 靠右對齊白框中心 */
+    transform: translate(-50%, -50%); /* 精準垂直水平置中於白框 */
+    width: 50%;            /* 寬度剛好限制在白框內 */
+    text-align: left;
+    color: #4a3b32;        /* 適合溫馨底色的深棕色文字 */
+}
+
+
+
+.footer-text span {
+    font-size: clamp(12px, 1.5vw, 14px);
+    line-height: 1;
+    margin-bottom: 1px;
+    white-space: nowrap;
+}
+
+.contact-info {
+    margin-top:15px;
+    font-size: clamp(12px, 1.3vw, 13px);
+    color:blank;
+}
+
+/* 4. 內文區域與字體 */
+main {
+    width: 90%;
+    margin: 30px auto;
+    text-align: left;
+}
+
+main h2 {
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    margin-bottom: 14px;
+}
+
+main p {
+    font-size: clamp(14px, 2.5vw, 18px);
+    margin: 12px 0 6px 0;
+}
+
+main select {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px 12px;
+    font-size: 14px;
+    margin-bottom: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* 5. 電腦與平板模式（螢幕寬度 ≥ 768px） */
+@media (min-width: 768px) {
+    header img {
+        width: 40%;
+    }
+
+    .footer-container {
+        width: 40%; /* 頁尾圖片與內文寬度保持同為 40% 置中 */
+    }
+
+    main {
+        width: 40%;
+        margin: 40px auto;
+    }
+}
+
+/* 儲存按鈕基本樣式（預設已儲存/未變更：灰色） */
+.save-btn {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #cccccc; /* 預設灰色 */
+    border: none;
+    border-radius: 6px;
+    cursor: not-allowed;
+    margin-top: 20px;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+/* 有變更時激活按鈕：淺綠色 */
+.save-btn.active {
+    background-color: #81c784; /* 淺綠色 */
+    cursor: pointer;
+}
+
+.save-btn.active:hover {
+    background-color: #66bb6a;
+}
+
+.save-btn.active:active {
+    transform: scale(0.98);
+}

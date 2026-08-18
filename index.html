@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+
+<head>
+    <meta charset="utf-8">
+    <!-- 加入這行確保手機端正確縮放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>555初始設定</title>
+    <link href="me.css" rel="stylesheet" type="text/css">
+</head>
+
+
+
+<body>
+
+    <header>
+        <img src="img/header.png" alt="台中學霸美食地圖">
+    </header>
+
+
+    <main>
+
+        <h2>學生設定表</h2>
+        <p>就讀學校: </p>
+        
+        <select name="school" id="school-select">
+            <option value="choice1">選擇就讀的學校</option>
+            <option value="school1">國立中興大學</option>
+             <option value="school2">國立臺中教育大學</option>
+              <option value="school3">國立勤益科技大學</option>
+              <option value="school4">國立臺灣體育運動大學</option>
+            <option value="school5">國立臺中科技大學</option>
+             <option value="school6">東海大學</option>
+              <option value="school7">逢甲大學</option>
+              <option value="choice8">靜宜大學</option>
+            <option value="school9">朝陽科技大學</option>
+             <option value="school10">中山醫學大學</option>
+              <option value="school11">弘光科技大學</option>
+              <option value="school12">中國醫藥大學</option>
+              <option value="school13">嶺東科技大學</option>
+              <option value="school14">中臺科技大學</option>
+              <option value="school15">亞洲大學</option>
+              <option value="school16">僑光科技大學</option>
+        </select>
+        <p>價位偏好: </p>
+        <select name="price" id="price-select">
+            <option value="choice2">選擇價位區間</option>
+            <option value="price1">0-100元</option>
+             <option value="price2">101-200元</option>
+              <option value="price3">201元以上</option>
+        </select>
+        <p>偏好移動距離範圍: </p>
+        <select name="distance" id="distance-select">
+            <option value="choice3">選擇移動距離範圍</option>
+            <option value="distance1">0-200公尺</option>
+             <option value="distance2">201-500公尺</option>
+              <option value="distance3">500公尺-1公里</option>
+              <option value="distance3">1公里以上</option>
+        </select>
+<!-- 新增儲存按鈕 -->
+    <button id="save-btn" class="save-btn" disabled>已是最新設定</button>
+    </main>
+    <!-- 引入控制邏輯 -->
+<script src="script.js"></script>
+<footer>
+    <div class="footer-container">
+            <img src="img/footer.png" alt="台中學霸美食地圖頁尾">
+            
+            <!-- 壓在白框上的文字內容 -->
+            <div class="footer-text">
+                <span>關於我們的理念:<br>解決你每餐不知道要吃什麼的問題！</span>
+                <p></p>
+                <div class="contact-info">
+                    <span>聯絡我們：<br><a href="mailto:minemoney2025@gmail.com">minemoney2025@gmail.com</a> <br> <a href="tel:+886-403-0968213668">0968-213-668</a></span>
+                </div>
+            </div>
+        </div> 
+</footer>
+</body>
+
+</html>
