@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>555初始設定</title>
     <link href="me.css" rel="stylesheet" type="text/css">
+    <!-- 1. 引入 LINE LIFF SDK (放頭部 <head> 內) -->
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 
 
@@ -77,6 +79,67 @@
             </div>
         </div> 
 </footer>
+
+
+
+<!-- 2. 邏輯腳本 (放 </body> 前) -->
+<script>
+  let currentUserId = '';
+
+  // 頁面載入時初始化 LIFF
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      // 替換成你在 LINE Developers 拿到的 LIFF ID
+      await liff.init({ liffId: "2011200610-smru4RvI" });
+      
+      if (!liff.isLoggedIn()) {
+        liff.login(); // 若未登入則自動引導登入
+      } else {
+        const profile = await liff.getProfile();
+        currentUserId = profile.userId; // 成功取得使用者的 LINE User ID
+        console.log("目前使用者 ID:", currentUserId);
+      }
+    } catch (error) {
+      console.error("LIFF 初始化失敗:", error);
+    }
+  });
+
+  // 按鈕點擊事件（請綁定到你網頁中的「儲存設定」按鈕 onClick="submitForm()"）
+  async function submitForm() {
+    // 取得輸入值（請確認 id 是否與你的 HTML input/select 欄位一致）
+    const school = document.getElementById('schoolSelect').value;
+    const price = document.getElementById('priceSelect').value;
+    const distance = document.getElementById('distanceSelect').value;
+
+    if (!currentUserId) {
+      alert("還沒取得使用者身分，請稍後再試！");
+      return;
+    }
+
+    // 先跳出視窗確認資料有順利抓到
+    alert(`偏好設定成功！\n學校：${school}\n價位：${price}\n距離：${distance}`);
+
+    // ---------------------------------------------------------
+    // 【預留區】等步驟三做完 GAS 後，把下面這段註解拿掉即可：
+    // ---------------------------------------------------------
+    /*
+    const gasWebAppUrl = "這裡未來貼上步驟三的_GAS_網址";
+    await fetch(gasWebAppUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        userId: currentUserId,
+        school: school,
+        price: price,
+        distance: distance
+      })
+    });
+    */
+
+    // 關閉 LIFF 視窗回到對話框
+    liff.closeWindow();
+  }
+</script>
 </body>
 
 </html>
