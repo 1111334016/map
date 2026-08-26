@@ -120,24 +120,24 @@
     alert(`偏好設定成功！\n學校：${school}\n價位：${price}\n距離：${distance}`);
 
     // ---------------------------------------------------------
-    // 【預留區】等步驟三做完 GAS 後，把下面這段註解拿掉即可：
-    // ---------------------------------------------------------
-    
-    const gasWebAppUrl = "https://script.google.com/macros/s/AKfycbybPsM6jjhXRMFl0rZ8ntctPtqP1mJz2LXk8CufoQWO5lpjMHMiDjLT7n5DFnvwhjvVxQ/exec";
-    await fetch(gasWebAppUrl, {//yes
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({
-        LINE_UserID: currentUserId,
-        school: 學校,
-        price: Price_Preference,
-        distance: Distance
-      })
-    });
-    
+// 傳送個人偏好設定至 GAS Web App
+// ---------------------------------------------------------
 
-    // 關閉 LIFF 視窗回到對話框
-    liff.closeWindow();
+const gasWebAppUrl = "https://script.google.com/macros/s/AKfycbybPsM6jjhXRMFl0rZ8ntctPtqP1mJz2LXk8CufoQWO5lpjMHMiDjLT7n5DFnvwhjvVxQ/exec";
+
+await fetch(gasWebAppUrl, {
+  method: 'POST',
+  headers: { 'Content-Type': 'text/plain' },
+  body: JSON.stringify({
+    userId: currentUserId,   // ⭕ 關鍵修正：改為 userId (與 GAS 後端一致)
+    school: 學校,
+    price: Price_Preference,
+    distance: Distance
+  })
+});
+
+// 關閉 LIFF 視窗回到對話框
+liff.closeWindow();
   }
 </script>
 </body>
