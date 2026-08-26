@@ -1,6 +1,11 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // 📌 未來完成 Google Apps Script 後，將 Web App URL 貼到單引號內即可
+document.addEventListener('DOMContentLoaded', async () => {
+    // 📌 GAS Web App URL
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybPsM6jjhXRMFl0rZ8ntctPtqP1mJz2LXk8CufoQWO5lpjMHMiDjLT7n5DFnvwhjvVxQ/exec';
+    
+    // 📌 請填入您的 LIFF ID (位於 LINE Developers > LIFF 頁面)
+    const MY_LIFF_ID = '2011200610-smru4RvI'; 
+
+    let currentUserId = ''; // 儲存 LINE User ID
 
     const schoolSelect = document.getElementById('school-select');
     const priceSelect = document.getElementById('price-select');
@@ -9,13 +14,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const selects = [schoolSelect, priceSelect, distanceSelect];
 
+    // 0. 初始化 LIFF SDK 並取得 UserID
+    async function initLiff() {
+        try {
+            if (!MY_LIFF_ID || MY_LIFF_ID === 'YOUR_LIFF_ID') {
+                console.warn('⚠️ 請務必填入真實的 MY_LIFF_ID');
+                return;
+            }
+            await liff.init({ liffId: MY_LIFF_ID });
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                currentUserId = profile.userId;
+                console.log('成功取得 UserID:', currentUserId);
+            } else {
+                liff.login();
+            }
+        } catch (err) {
+            console.error('LIFF 初始化失敗:', err);
+        }
+    }
+
     // 1. 載入本地儲存紀錄
     function loadSettings() {
         const savedData = JSON.parse(localStorage.getItem('userSettings'));
         if (savedData) {
-            schoolSelect.value = savedData.school || 'choice1';
-            priceSelect.value = savedData.price || 'choice2';
-            distanceSelect.value = savedData.distance || 'choice3';
+            schoolSelect.value = savedData.school || schoolSelect.options[0].value;
+            priceSelect.value = savedData.price || priceSelect.options[0].value;
+            distanceSelect.value = savedData.distance || distanceSelect.options[0].value;
         }
         updateButtonState();
     }
@@ -33,9 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. 檢查變動並切換按鈕顏色（綠色/灰色）
     function updateButtonState() {
         const savedData = JSON.parse(localStorage.getItem('userSettings')) || {
-            school: 'choice1',
-            price: 'choice2',
-            distance: 'choice3'
+            school: schoolSelect.options[0].value,
+            price: priceSelect.options[0].value,
+            distance: distanceSelect.options[0].value
         };
         const currentData = getCurrentData();
 
@@ -55,27 +80,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 4. 點擊儲存按鈕
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
+        if (!currentUserId) {
+            alert('⚠️ 尚未取得 UserID，請重新開啟頁面或於 LINE 內開啟！');
+            return;
+        }
+
         const currentData = getCurrentData();
 
         // 寫入本地 localStorage
         localStorage.setItem('userSettings', JSON.stringify(currentData));
         updateButtonState();
 
-        // 預留 GAS 背景傳送功能
-        if (GAS_WEB_APP_URL.trim() !== '') {
-            fetch(GAS_WEB_APP_URL, {
+        // 抓取選單顯示的實際中文文字 (例如: 國立臺中科技大學(三民校區))
+        const selectedSchoolText = schoolSelect.options[schoolSelect.selectedIndex].text;
+        const selectedPriceText = priceSelect.options[priceSelect.selectedIndex].text;
+        const selectedDistanceText = distanceSelect.options[distanceSelect.selectedIndex].text;
+
+        // 打包傳送到 GAS 的 JSON 資料
+        const payload = {
+            userId: currentUserId,
+            school: selectedSchoolText,
+            price: selectedPriceText,
+            distance: selectedDistanceText
+        };
+
+        saveBtn.disabled = true;
+        saveBtn.textContent = '儲存中...';
+
+        try {
+            const response = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(currentData)
-            }).catch(error => console.error('GAS 傳送失敗:', error));
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(payload)
+            });
+
+            alert('✅ 設定已成功儲存！');
+            
+            // 關閉 LIFF 視窗回到 LINE 聊天室
+            if (typeof liff !== 'undefined' && liff.isInClient()) {
+                liff.closeWindow();
+            }
+        } catch (error) {
+            console.error('GAS 傳送失敗:', error);
+            alert('❌ 儲存失敗：' + error.message);
+            updateButtonState();
         }
     });
 
     // 5. 監聽變更
     selects.forEach(select => select.addEventListener('change', updateButtonState));
 
-    // 6. 初始化
+    // 6. 初始化執行
+    await initLiff();
     loadSettings();
 });
