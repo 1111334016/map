@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 📌 未來完成 Google Apps Script 後，將 Web App URL 貼到單引號內即可
-    const GAS_WEB_APP_URL = '';
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybPsM6jjhXRMFl0rZ8ntctPtqP1mJz2LXk8CufoQWO5lpjMHMiDjLT7n5DFnvwhjvVxQ/exec';
 
     const schoolSelect = document.getElementById('school-select');
     const priceSelect = document.getElementById('price-select');
