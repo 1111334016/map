@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 4. 點擊儲存按鈕
     saveBtn.addEventListener('click', async () => {
+        alert("診斷訊息：\nUserID=" + currentUserId + "\n學校=" + schoolSelect.options[schoolSelect.selectedIndex].text);
         if (!currentUserId) {
             alert('⚠️ 尚未取得 UserID，請重新開啟頁面或於 LINE 內開啟！');
             return;
