@@ -81,24 +81,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 4. 點擊儲存按鈕
     saveBtn.addEventListener('click', async () => {
-        alert("診斷訊息：\nUserID=" + currentUserId + "\n學校=" + schoolSelect.options[schoolSelect.selectedIndex].text);
         if (!currentUserId) {
-            alert('⚠️ 尚未取得 UserID，請重新開啟頁面或於 LINE 內開啟！');
+            alert('⚠️ 尚未取得 UserID，請重新開啟頁面！');
             return;
         }
 
-        const currentData = getCurrentData();
+        // 取得選項原始文字
+        const rawSchool = schoolSelect.options[schoolSelect.selectedIndex].text;
+        const rawPrice = priceSelect.options[priceSelect.selectedIndex].text;
+        const rawDistance = distanceSelect.options[distanceSelect.selectedIndex].text;
 
-        // 寫入本地 localStorage
-        localStorage.setItem('userSettings', JSON.stringify(currentData));
-        updateButtonState();
+        // 若為預設提示文字（包含「選擇」或 choice），自動設為「不限」
+        const selectedSchoolText = (schoolSelect.value.startsWith('choice') || rawSchool.includes('選擇')) ? '不限' : rawSchool;
+        const selectedPriceText = (priceSelect.value.startsWith('choice') || rawPrice.includes('選擇')) ? '不限' : rawPrice;
+        const selectedDistanceText = (distanceSelect.value.startsWith('choice') || rawDistance.includes('選擇')) ? '不限' : rawDistance;
 
-        // 抓取選單顯示的實際中文文字 (例如: 國立臺中科技大學(三民校區))
-        const selectedSchoolText = schoolSelect.options[schoolSelect.selectedIndex].text;
-        const selectedPriceText = priceSelect.options[priceSelect.selectedIndex].text;
-        const selectedDistanceText = distanceSelect.options[distanceSelect.selectedIndex].text;
-
-        // 打包傳送到 GAS 的 JSON 資料
         const payload = {
             userId: currentUserId,
             school: selectedSchoolText,
@@ -110,15 +107,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         saveBtn.textContent = '儲存中...';
 
         try {
-            const response = await fetch(GAS_WEB_APP_URL, {
+            await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify(payload)
             });
 
             alert('✅ 設定已成功儲存！');
-            
-            // 關閉 LIFF 視窗回到 LINE 聊天室
             if (typeof liff !== 'undefined' && liff.isInClient()) {
                 liff.closeWindow();
             }
