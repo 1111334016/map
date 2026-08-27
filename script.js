@@ -11,29 +11,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     const priceSelect = document.getElementById('price-select');
     const distanceSelect = document.getElementById('distance-select');
     const saveBtn = document.getElementById('save-btn');
-
     const selects = [schoolSelect, priceSelect, distanceSelect];
 
     // 0. 初始化 LIFF SDK 並取得 UserID
     async function initLiff() {
+        // LIFF 載入中先禁用按鈕
+        saveBtn.disabled = true;
+        saveBtn.textContent = '載入使用者資訊中...';
+
         try {
             if (!MY_LIFF_ID || MY_LIFF_ID === 'YOUR_LIFF_ID') {
                 console.warn('⚠️ 請務必填入真實的 MY_LIFF_ID');
+                alert('⚠️ LIFF ID 設定錯誤，請聯繫管理員！');
                 return;
             }
+
             await liff.init({ liffId: MY_LIFF_ID });
             
             if (liff.isLoggedIn()) {
                 const profile = await liff.getProfile();
-                currentUserId = profile.userId;
-                console.log('成功取得 UserID:', currentUserId);
+                currentUserId = profile.userId ? profile.userId.trim() : '';
+                console.log('✅ 成功取得 UserID:', currentUserId);
             } else {
-                // 尚未登入則導向 LINE 授權頁面並中斷執行
+                // 尚未登入則導向 LINE 授權頁面
                 liff.login();
                 return;
             }
         } catch (err) {
-            console.error('LIFF 初始化失敗:', err);
+            console.error('❌ LIFF 初始化失敗:', err);
+            alert('❌ 身份驗證失敗，請重新從 LINE 點擊選單開啟頁面！');
         }
     }
 
@@ -57,11 +63,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     }
 
-    // 3. 檢查變動並切換按鈕狀態（修正新使用者無紀錄無法點擊的問題）
+    // 3. 檢查變動並切換按鈕狀態
     function updateButtonState() {
+        // 若還沒拿到 User ID，保持禁用
+        if (!currentUserId) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = '無法取得 User ID';
+            return;
+        }
+
         const rawSavedData = localStorage.getItem('userSettings');
         
-        // 若使用者從未儲存過（首次使用），預設強制開放按鈕
+        // 若首次使用（無本地紀錄），預設開放儲存
         if (!rawSavedData) {
             saveBtn.classList.add('active');
             saveBtn.disabled = false;
@@ -94,22 +107,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // 取得當前選單值並寫入 localStorage (解決儲存後下次開啟失效的問題)
-        const currentData = getCurrentData();
-        localStorage.setItem('userSettings', JSON.stringify(currentData));
-
         // 取得選項顯示文字
         const rawSchool = schoolSelect.options[schoolSelect.selectedIndex].text;
         const rawPrice = priceSelect.options[priceSelect.selectedIndex].text;
         const rawDistance = distanceSelect.options[distanceSelect.selectedIndex].text;
 
-        // 若為預設提示文字（包含「選擇」或 choice），自動轉換為「不限」
-        const selectedSchoolText = (schoolSelect.value.startsWith('choice') || rawSchool.includes('選擇')) ? '不限' : rawSchool;
-        const selectedPriceText = (priceSelect.value.startsWith('choice') || rawPrice.includes('選擇')) ? '不限' : rawPrice;
-        const selectedDistanceText = (distanceSelect.value.startsWith('choice') || rawDistance.includes('選擇')) ? '不限' : rawDistance;
+        // 格式化文字（預設提示轉為「不限」）
+        const selectedSchoolText = (schoolSelect.value.startsWith('choice') || rawSchool.includes('選擇')) ? '不限' : rawSchool.trim();
+        const selectedPriceText = (priceSelect.value.startsWith('choice') || rawPrice.includes('選擇')) ? '不限' : rawPrice.trim();
+        const selectedDistanceText = (distanceSelect.value.startsWith('choice') || rawDistance.includes('選擇')) ? '不限' : rawDistance.trim();
 
         const payload = {
-            userId: currentUserId,
+            userId: currentUserId.trim(),
             school: selectedSchoolText,
             price: selectedPriceText,
             distance: selectedDistanceText
@@ -119,17 +128,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         saveBtn.textContent = '儲存中...';
 
         try {
-            await fetch(GAS_WEB_APP_URL, {
+            const response = await fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             });
 
-            alert('✅ 設定已成功儲存！');
-            updateButtonState();
+            if (response.ok) {
+                // 成功寫入後更新 LocalStorage
+                localStorage.setItem('userSettings', JSON.stringify(getCurrentData()));
+                alert('✅ 設定已成功儲存！');
+                updateButtonState();
 
-            if (typeof liff !== 'undefined' && liff.isInClient()) {
-                liff.closeWindow();
+                if (typeof liff !== 'undefined' && liff.isInClient()) {
+                    liff.closeWindow();
+                }
+            } else {
+                throw new Error('伺服器回應異常 (' + response.status + ')');
             }
         } catch (error) {
             console.error('GAS 傳送失敗:', error);
@@ -141,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 5. 監聽變更
     selects.forEach(select => select.addEventListener('change', updateButtonState));
 
-    // 6. 初始化執行
+    // 6. 初始化執行流程
     await initLiff();
     loadSettings();
 });
