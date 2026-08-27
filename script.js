@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 📌 GAS Web App URL
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybPsM6jjhXRMFl0rZ8ntctPtqP1mJz2LXk8CufoQWO5lpjMHMiDjLT7n5DFnvwhjvVxQ/exec';
     
-    // 📌 請填入您的 LIFF ID (位於 LINE Developers > LIFF 頁面)
+    // 📌 LIFF ID
     const MY_LIFF_ID = '2011200610-smru4RvI'; 
 
     let currentUserId = ''; // 儲存 LINE User ID
@@ -22,12 +22,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             await liff.init({ liffId: MY_LIFF_ID });
+            
             if (liff.isLoggedIn()) {
                 const profile = await liff.getProfile();
                 currentUserId = profile.userId;
                 console.log('成功取得 UserID:', currentUserId);
             } else {
+                // 尚未登入則導向 LINE 授權頁面並中斷執行
                 liff.login();
+                return;
             }
         } catch (err) {
             console.error('LIFF 初始化失敗:', err);
@@ -50,18 +53,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         return {
             school: schoolSelect.value,
             price: priceSelect.value,
-            distance: distanceSelect.value,
-            timestamp: new Date().toLocaleString()
+            distance: distanceSelect.value
         };
     }
 
-    // 3. 檢查變動並切換按鈕顏色（綠色/灰色）
+    // 3. 檢查變動並切換按鈕狀態（修正新使用者無紀錄無法點擊的問題）
     function updateButtonState() {
-        const savedData = JSON.parse(localStorage.getItem('userSettings')) || {
-            school: schoolSelect.options[0].value,
-            price: priceSelect.options[0].value,
-            distance: distanceSelect.options[0].value
-        };
+        const rawSavedData = localStorage.getItem('userSettings');
+        
+        // 若使用者從未儲存過（首次使用），預設強制開放按鈕
+        if (!rawSavedData) {
+            saveBtn.classList.add('active');
+            saveBtn.disabled = false;
+            saveBtn.textContent = '儲存設定';
+            return;
+        }
+
+        const savedData = JSON.parse(rawSavedData);
         const currentData = getCurrentData();
 
         const isChanged = (savedData.school !== currentData.school) ||
@@ -86,12 +94,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // 取得選項原始文字
+        // 取得當前選單值並寫入 localStorage (解決儲存後下次開啟失效的問題)
+        const currentData = getCurrentData();
+        localStorage.setItem('userSettings', JSON.stringify(currentData));
+
+        // 取得選項顯示文字
         const rawSchool = schoolSelect.options[schoolSelect.selectedIndex].text;
         const rawPrice = priceSelect.options[priceSelect.selectedIndex].text;
         const rawDistance = distanceSelect.options[distanceSelect.selectedIndex].text;
 
-        // 若為預設提示文字（包含「選擇」或 choice），自動設為「不限」
+        // 若為預設提示文字（包含「選擇」或 choice），自動轉換為「不限」
         const selectedSchoolText = (schoolSelect.value.startsWith('choice') || rawSchool.includes('選擇')) ? '不限' : rawSchool;
         const selectedPriceText = (priceSelect.value.startsWith('choice') || rawPrice.includes('選擇')) ? '不限' : rawPrice;
         const selectedDistanceText = (distanceSelect.value.startsWith('choice') || rawDistance.includes('選擇')) ? '不限' : rawDistance;
@@ -114,6 +126,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             alert('✅ 設定已成功儲存！');
+            updateButtonState();
+
             if (typeof liff !== 'undefined' && liff.isInClient()) {
                 liff.closeWindow();
             }
