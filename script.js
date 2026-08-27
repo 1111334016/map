@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybPsM6jjhXRMFl0rZ8ntctPtqP1mJz2LXk8CufoQWO5lpjMHMiDjLT7n5DFnvwhjvVxQ/exec';
     
     // 📌 LIFF ID
-    const MY_LIFF_ID = '2011200610-smru4RvI'; 
+    const MY_LIFF_ID = '2011288416-9QX9xXhz'; 
 
     let currentUserId = ''; // 儲存 LINE User ID
 
