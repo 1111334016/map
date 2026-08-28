@@ -2,6 +2,12 @@ const LIFF_ID = "你的LIFF_ID";
 const GAS_WEB_APP_URL = "你的GAS網址";
 
 document.addEventListener("DOMContentLoaded", function () {
+    const saveBtn = document.getElementById("save-btn");
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerText = "資料載入中...";
+        saveBtn.style.backgroundColor = "#888888";
+    }
     initializeApp();
 });
 
@@ -16,14 +22,21 @@ async function initializeApp() {
         const profile = await liff.getProfile();
         window.currentUserId = profile.userId;
 
-        // 載入已儲存的設定並自動選取下拉選單
         await loadUserData(window.currentUserId);
         
-        // 初始化事件監聽
+        // 載入完成後才解鎖按鈕並轉為綠色
+        const saveBtn = document.getElementById("save-btn");
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerText = "儲存設定";
+            saveBtn.style.backgroundColor = "#1DB446";
+        }
+
         setupEventListeners();
 
     } catch (error) {
         console.error("LIFF 初始化失敗", error);
+        alert("LIFF 初始化失敗，請重新整理網頁。");
     }
 }
 
@@ -37,21 +50,12 @@ async function loadUserData(userId) {
             if (p.school) setDropdownValue("school-select", p.school);
             if (p.price) setDropdownValue("price-select", p.price);
             if (p.distance) setDropdownValue("distance-select", p.distance);
-            
-            // 載入成功後，讓按鈕維持可用狀態並提示
-            const saveBtn = document.getElementById("save-btn");
-            if (saveBtn) {
-                saveBtn.disabled = false;
-                saveBtn.innerText = "儲存設定";
-                saveBtn.style.backgroundColor = "#1DB446"; // 轉為綠色
-            }
         }
     } catch (err) {
         console.error("載入使用者資料失敗", err);
     }
 }
 
-// 模糊比對並自動勾選下拉選單（解決字串微小差異抓不到的問題）
 function setDropdownValue(elementId, value) {
     const selectElem = document.getElementById(elementId);
     if (!selectElem || !value) return;
@@ -59,7 +63,6 @@ function setDropdownValue(elementId, value) {
     let targetVal = value.toString().trim();
     let matched = false;
 
-    // 1. 先嘗試精準比對
     for (let option of selectElem.options) {
         if (option.value === targetVal || option.text.trim() === targetVal) {
             selectElem.value = option.value;
@@ -68,7 +71,6 @@ function setDropdownValue(elementId, value) {
         }
     }
 
-    // 2. 若精準比對不到，改用包含關鍵字的模糊比對
     if (!matched) {
         for (let option of selectElem.options) {
             if (option.value.includes(targetVal) || targetVal.includes(option.value) ||
@@ -98,6 +100,11 @@ function setupEventListeners() {
     distanceSelect.addEventListener("change", checkChange);
 
     saveBtn.addEventListener("click", async function () {
+        if (!window.currentUserId) {
+            alert("尚未取得使用者資訊，請稍候再試。");
+            return;
+        }
+
         saveBtn.disabled = true;
         saveBtn.innerText = "儲存中...";
 
@@ -113,7 +120,7 @@ function setupEventListeners() {
                 alert("設定儲存成功！");
                 setTimeout(() => liff.closeWindow(), 1000);
             } else {
-                alert("儲存失敗，請稍後再試。");
+                alert("儲存失敗：" + (resData.message || '未知錯誤'));
                 saveBtn.disabled = false;
                 saveBtn.innerText = "儲存設定";
                 saveBtn.style.backgroundColor = "#1DB446";
