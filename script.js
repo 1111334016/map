@@ -1,6 +1,4 @@
-// 請換成你自己的 LIFF ID
 const LIFF_ID = "你的LIFF_ID"; 
-// 請換成你的 Google Apps Script 部署網址 (Web App URL)
 const GAS_WEB_APP_URL = "你的GAS網址";
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -18,10 +16,8 @@ async function initializeApp() {
         const profile = await liff.getProfile();
         window.currentUserId = profile.userId;
 
-        // 向 GAS 請求該使用者先前儲存的設定
+        // 載入已儲存的設定
         await loadUserData(window.currentUserId);
-
-        // 監聽下拉選單變更，解鎖儲存按鈕
         setupEventListeners();
 
     } catch (error) {
@@ -76,18 +72,11 @@ function setupEventListeners() {
         saveBtn.disabled = true;
         saveBtn.innerText = "儲存中...";
 
-        const payload = {
-            userId: window.currentUserId,
-            school: schoolSelect.value,
-            price: priceSelect.value,
-            distance: distanceSelect.value
-        };
+        // 改用 GET 參數傳遞，徹底避開 Google Apps Script 的 POST 重新導向吃掉資料問題
+        const saveUrl = `${GAS_WEB_APP_URL}?action=save&userId=${encodeURIComponent(window.currentUserId)}&school=${encodeURIComponent(schoolSelect.value)}&price=${encodeURIComponent(priceSelect.value)}&distance=${encodeURIComponent(distanceSelect.value)}`;
 
         try {
-            const response = await fetch(GAS_WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            });
+            const response = await fetch(saveUrl);
             const resData = await response.json();
 
             if (resData.status === 'success') {
