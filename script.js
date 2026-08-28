@@ -24,7 +24,6 @@ async function initializeApp() {
 
         await loadUserData(window.currentUserId);
         
-        // 載入完成後才解鎖按鈕並轉為綠色
         const saveBtn = document.getElementById("save-btn");
         if (saveBtn) {
             saveBtn.disabled = false;
@@ -108,10 +107,21 @@ function setupEventListeners() {
         saveBtn.disabled = true;
         saveBtn.innerText = "儲存中...";
 
-        const saveUrl = `${GAS_WEB_APP_URL}?action=save&userId=${encodeURIComponent(window.currentUserId)}&school=${encodeURIComponent(schoolSelect.value)}&price=${encodeURIComponent(priceSelect.value)}&distance=${encodeURIComponent(distanceSelect.value)}`;
+        // 改用 POST 傳遞資料，避免 GET 重新導向錯誤
+        const postData = {
+            action: "save",
+            userId: window.currentUserId,
+            school: schoolSelect.value,
+            price: priceSelect.value,
+            distance: distanceSelect.value
+        };
 
         try {
-            const response = await fetch(saveUrl);
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: "POST",
+                body: JSON.stringify(postData),
+                headers: { "Content-Type": "text/plain;charset=utf-8" } // 避免 GAS 触发 CORS 預檢失敗
+            });
             const resData = await response.json();
 
             if (resData.status === 'success') {
