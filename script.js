@@ -168,7 +168,7 @@ function parseDistanceToMeters(distanceStr) {
 // "200公尺" -> 200
 // "2.0公里" -> 2000
 
-    // 5. 監聽變更
+    // 5. 監聽變更//
     selects.forEach(select => select.addEventListener('change', updateButtonState));
 
     // 6. 初始化執行流程
