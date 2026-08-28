@@ -153,6 +153,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // 距離字串轉公尺數字範例
+function parseDistanceToMeters(distanceStr) {
+  if (!distanceStr) return 0;
+  
+  const num = parseFloat(distanceStr);
+  if (distanceStr.includes('公里')) {
+    return num * 1000;
+  }
+  return num; // 公尺直接回傳數字
+}
+
+// 範例輸出：
+// "200公尺" -> 200
+// "2.0公里" -> 2000
+
     // 5. 監聽變更
     selects.forEach(select => select.addEventListener('change', updateButtonState));
 
