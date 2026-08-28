@@ -16,8 +16,10 @@ async function initializeApp() {
         const profile = await liff.getProfile();
         window.currentUserId = profile.userId;
 
-        // 載入已儲存的設定
+        // 載入已儲存的設定並自動選取下拉選單
         await loadUserData(window.currentUserId);
+        
+        // 初始化事件監聽
         setupEventListeners();
 
     } catch (error) {
@@ -35,19 +37,46 @@ async function loadUserData(userId) {
             if (p.school) setDropdownValue("school-select", p.school);
             if (p.price) setDropdownValue("price-select", p.price);
             if (p.distance) setDropdownValue("distance-select", p.distance);
+            
+            // 載入成功後，讓按鈕維持可用狀態並提示
+            const saveBtn = document.getElementById("save-btn");
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerText = "儲存設定";
+                saveBtn.style.backgroundColor = "#1DB446"; // 轉為綠色
+            }
         }
     } catch (err) {
         console.error("載入使用者資料失敗", err);
     }
 }
 
+// 模糊比對並自動勾選下拉選單（解決字串微小差異抓不到的問題）
 function setDropdownValue(elementId, value) {
     const selectElem = document.getElementById(elementId);
-    if (!selectElem) return;
+    if (!selectElem || !value) return;
+
+    let targetVal = value.toString().trim();
+    let matched = false;
+
+    // 1. 先嘗試精準比對
     for (let option of selectElem.options) {
-        if (option.value === value || option.text === value) {
+        if (option.value === targetVal || option.text.trim() === targetVal) {
             selectElem.value = option.value;
+            matched = true;
             break;
+        }
+    }
+
+    // 2. 若精準比對不到，改用包含關鍵字的模糊比對
+    if (!matched) {
+        for (let option of selectElem.options) {
+            if (option.value.includes(targetVal) || targetVal.includes(option.value) ||
+                option.text.includes(targetVal) || targetVal.includes(option.text.trim())) {
+                selectElem.value = option.value;
+                matched = true;
+                break;
+            }
         }
     }
 }
@@ -72,7 +101,6 @@ function setupEventListeners() {
         saveBtn.disabled = true;
         saveBtn.innerText = "儲存中...";
 
-        // 改用 GET 參數傳遞，徹底避開 Google Apps Script 的 POST 重新導向吃掉資料問題
         const saveUrl = `${GAS_WEB_APP_URL}?action=save&userId=${encodeURIComponent(window.currentUserId)}&school=${encodeURIComponent(schoolSelect.value)}&price=${encodeURIComponent(priceSelect.value)}&distance=${encodeURIComponent(distanceSelect.value)}`;
 
         try {
@@ -80,7 +108,7 @@ function setupEventListeners() {
             const resData = await response.json();
 
             if (resData.status === 'success') {
-                saveBtn.innerText = "已是最新設定";
+                saveBtn.innerText = "已儲存成功";
                 saveBtn.style.backgroundColor = "#888888";
                 alert("設定儲存成功！");
                 setTimeout(() => liff.closeWindow(), 1000);
@@ -88,12 +116,14 @@ function setupEventListeners() {
                 alert("儲存失敗，請稍後再試。");
                 saveBtn.disabled = false;
                 saveBtn.innerText = "儲存設定";
+                saveBtn.style.backgroundColor = "#1DB446";
             }
         } catch (e) {
             console.error(e);
             alert("網路異常，儲存失敗。");
             saveBtn.disabled = false;
             saveBtn.innerText = "儲存設定";
+            saveBtn.style.backgroundColor = "#1DB446";
         }
     });
 }
