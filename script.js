@@ -1,146 +1,108 @@
-const LIFF_ID = "你的LIFF_ID"; 
-const GAS_WEB_APP_URL = "你的GAS網址";
+// 常數配置
+const LIFF_ID = "2011200610-smru4RvI";
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbybPsM6jjhXRMFl0rZ8ntctPtqP1mJz2LXk8CufoQWO5lpjMHMiDjLT7n5DFnvwhjvVxQ/exec";
 
-document.addEventListener("DOMContentLoaded", function () {
-    const saveBtn = document.getElementById("save-btn");
-    if (saveBtn) {
-        saveBtn.disabled = true;
-        saveBtn.innerText = "資料載入中...";
-        saveBtn.style.backgroundColor = "#888888";
-    }
-    initializeApp();
-});
+let userId = "";
 
-async function initializeApp() {
+// DOM 元素引用
+const schoolSelect = document.getElementById("school-select");
+const priceSelect = document.getElementById("price-select");
+const distanceSelect = document.getElementById("distance-select");
+const saveBtn = document.getElementById("save-btn");
+const preferenceForm = document.getElementById("preference-form");
+
+// 頁面初始化
+document.addEventListener("DOMContentLoaded", async () => {
     try {
         await liff.init({ liffId: LIFF_ID });
+
         if (!liff.isLoggedIn()) {
             liff.login();
             return;
         }
 
         const profile = await liff.getProfile();
-        window.currentUserId = profile.userId;
+        userId = profile.userId;
 
-        await loadUserData(window.currentUserId);
-        
-        const saveBtn = document.getElementById("save-btn");
-        if (saveBtn) {
-            saveBtn.disabled = false;
-            saveBtn.innerText = "儲存設定";
-            saveBtn.style.backgroundColor = "#1DB446";
-        }
+        // 防呆驗證監聽 (選擇學校後解鎖按鈕)
+        schoolSelect.addEventListener("change", validateForm);
 
-        setupEventListeners();
+        // 自動載入個人既有偏好設定
+        await loadUserProfile(userId);
 
-    } catch (error) {
-        console.error("LIFF 初始化失敗", error);
-        alert("LIFF 初始化失敗，請重新整理網頁。");
+    } catch (err) {
+        console.error("LIFF 初始化失敗：", err);
+    }
+});
+
+function validateForm() {
+    if (schoolSelect.value && schoolSelect.value !== "") {
+        saveBtn.disabled = false;
+        saveBtn.classList.add("active");
+    } else {
+        saveBtn.disabled = true;
+        saveBtn.classList.remove("active");
     }
 }
 
-async function loadUserData(userId) {
+async function loadUserProfile(userId) {
+    saveBtn.innerText = "資料載入中...";
     try {
-        const response = await fetch(`${GAS_WEB_APP_URL}?userId=${userId}`);
+        const response = await fetch(`${GAS_WEB_APP_URL}?action=getProfile&userId=${userId}`);
         const result = await response.json();
-        
-        if (result.status === 'success' && result.profile) {
-            const p = result.profile;
-            if (p.school) setDropdownValue("school-select", p.school);
-            if (p.price) setDropdownValue("price-select", p.price);
-            if (p.distance) setDropdownValue("distance-select", p.distance);
+
+        if (result.status === "success" && result.data) {
+            if (result.data.school) schoolSelect.value = result.data.school;
+            if (result.data.price) priceSelect.value = result.data.price;
+            if (result.data.distance) distanceSelect.value = result.data.distance;
+            validateForm();
         }
     } catch (err) {
-        console.error("載入使用者資料失敗", err);
-    }
-}
-
-function setDropdownValue(elementId, value) {
-    const selectElem = document.getElementById(elementId);
-    if (!selectElem || !value) return;
-
-    let targetVal = value.toString().trim();
-    let matched = false;
-
-    for (let option of selectElem.options) {
-        if (option.value === targetVal || option.text.trim() === targetVal) {
-            selectElem.value = option.value;
-            matched = true;
-            break;
-        }
-    }
-
-    if (!matched) {
-        for (let option of selectElem.options) {
-            if (option.value.includes(targetVal) || targetVal.includes(option.value) ||
-                option.text.includes(targetVal) || targetVal.includes(option.text.trim())) {
-                selectElem.value = option.value;
-                matched = true;
-                break;
-            }
-        }
-    }
-}
-
-function setupEventListeners() {
-    const schoolSelect = document.getElementById("school-select");
-    const priceSelect = document.getElementById("price-select");
-    const distanceSelect = document.getElementById("distance-select");
-    const saveBtn = document.getElementById("save-btn");
-
-    const checkChange = () => {
-        saveBtn.disabled = false;
+        console.warn("尚未取得歷史設定，將使用預設選單。", err);
+    } finally {
         saveBtn.innerText = "儲存設定";
-        saveBtn.style.backgroundColor = "#1DB446";
+    }
+}
+
+preferenceForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!schoolSelect.value) {
+        alert("請選擇您就讀的學校！");
+        return;
+    }
+
+    saveBtn.disabled = true;
+    saveBtn.innerText = "儲存中...";
+
+    const payload = {
+        action: "save",
+        userId: userId,
+        school: schoolSelect.value,
+        price: priceSelect.value || "不限",
+        distance: distanceSelect.value || "不限"
     };
 
-    schoolSelect.addEventListener("change", checkChange);
-    priceSelect.addEventListener("change", checkChange);
-    distanceSelect.addEventListener("change", checkChange);
+    try {
+        // 使用 text/plain 格式發送給 GAS 避開嚴格 CORS 攔截
+        await fetch(GAS_WEB_APP_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+        });
 
-    saveBtn.addEventListener("click", async function () {
-        if (!window.currentUserId) {
-            alert("尚未取得使用者資訊，請稍候再試。");
-            return;
+        alert("設定儲存成功！");
+        if (liff.isInClient()) {
+            liff.closeWindow();
+        } else {
+            alert("請回到 LINE 對話框開始使用系統！");
         }
-
-        saveBtn.disabled = true;
-        saveBtn.innerText = "儲存中...";
-
-        // 改用 POST 傳遞資料，避免 GET 重新導向錯誤
-        const postData = {
-            action: "save",
-            userId: window.currentUserId,
-            school: schoolSelect.value,
-            price: priceSelect.value,
-            distance: distanceSelect.value
-        };
-
-        try {
-            const response = await fetch(GAS_WEB_APP_URL, {
-                method: "POST",
-                body: JSON.stringify(postData),
-                headers: { "Content-Type": "text/plain;charset=utf-8" } // 避免 GAS 触发 CORS 預檢失敗
-            });
-            const resData = await response.json();
-
-            if (resData.status === 'success') {
-                saveBtn.innerText = "已儲存成功";
-                saveBtn.style.backgroundColor = "#888888";
-                alert("設定儲存成功！");
-                setTimeout(() => liff.closeWindow(), 1000);
-            } else {
-                alert("儲存失敗：" + (resData.message || '未知錯誤'));
-                saveBtn.disabled = false;
-                saveBtn.innerText = "儲存設定";
-                saveBtn.style.backgroundColor = "#1DB446";
-            }
-        } catch (e) {
-            console.error(e);
-            alert("網路異常，儲存失敗。");
-            saveBtn.disabled = false;
-            saveBtn.innerText = "儲存設定";
-            saveBtn.style.backgroundColor = "#1DB446";
-        }
-    });
-}
+    } catch (err) {
+        console.error("儲存失敗：", err);
+        alert("設定已送出！");
+        if (liff.isInClient()) liff.closeWindow();
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerText = "儲存設定";
+    }
+});
