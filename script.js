@@ -1,6 +1,6 @@
 // 常數配置
 const LIFF_ID = "2011200610-smru4RvI";
-const GAS_WEB_APP_URL = "https://1111334016.github.io/map/";
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbybPsM6jjhXRMFl0rZ8ntctPtqP1mJz2LXk8CufoQWO5lpjMHMiDjLT7n5DFnvwhjvVxQ/exec";
 
 let userId = "";
 
