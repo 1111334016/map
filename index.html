@@ -1,86 +1,82 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>台中學霸美食地圖 - 偏好設定</title>
-  <link rel="stylesheet" href="me.css">
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>台中學霸美食地圖 - 偏好設定</title>
+    <link rel="stylesheet" href="me.css">
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
-
 <body>
-  <div class="container">
-    <header class="header">
-      <img src="img/header.png" alt="台中學霸美食地圖">
-    </header>
+    <div class="container">
+        <header class="header">
+            <img src="img/header.png" alt="台中學霸美食地圖">
+        </header>
 
-    <main class="main-content">
-      <h2 class="title">學生設定表</h2>
+        <main class="main-content">
+            <h2 class="title">學生設定表</h2>
+            
+            <form id="preference-form">
+                <div class="form-group">
+                    <label for="school-select">就讀學校 <span class="required">*</span></label>
+                    <select id="school-select" required>
+                        <option value="" disabled selected>選擇就讀的學校</option>
+                        <option value="國立中興大學">國立中興大學</option>
+                        <option value="國立臺中教育大學">國立臺中教育大學</option>
+                        <option value="國立勤益科技大學">國立勤益科技大學</option>
+                        <option value="國立臺灣體育運動大學">國立臺灣體育運動大學</option>
+                        <option value="國立臺中科技大學">國立臺中科技大學</option>
+                        <option value="東海大學">東海大學</option>
+                        <option value="逢甲大學">逢甲大學</option>
+                        <option value="靜宜大學">靜宜大學</option>
+                        <option value="朝陽科技大學">朝陽科技大學</option>
+                        <option value="中山醫學大學">中山醫學大學</option>
+                        <option value="弘光科技大學">弘光科技大學</option>
+                        <option value="中國醫藥大學">中國醫藥大學</option>
+                        <option value="嶺東科技大學">嶺東科技大學</option>
+                        <option value="中臺科技大學">中臺科技大學</option>
+                        <option value="亞洲大學">亞洲大學</option>
+                        <option value="僑光科技大學">僑光科技大學</option>
+                    </select>
+                </div>
 
-      <form id="preference-form">
-        <div class="form-group">
-          <label for="school-select">就讀學校 <span class="required">*</span></label>
-          <select id="school-select" required>
-            <option value="" disabled selected>選擇就讀的學校</option>
-            <option value="國立中興大學">國立中興大學</option>
-            <option value="國立臺中教育大學">國立臺中教育大學</option>
-            <option value="國立勤益科技大學">國立勤益科技大學</option>
-            <option value="國立臺灣體育運動大學">國立臺灣體育運動大學</option>
-            <option value="國立臺中科技大學">國立臺中科技大學</option>
-            <option value="東海大學">東海大學</option>
-            <option value="逢甲大學">逢甲大學</option>
-            <option value="靜宜大學">靜宜大學</option>
-            <option value="朝陽科技大學">朝陽科技大學</option>
-            <option value="中山醫學大學">中山醫學大學</option>
-            <option value="弘光科技大學">弘光科技大學</option>
-            <option value="中國醫藥大學">中國醫藥大學</option>
-            <option value="嶺東科技大學">嶺東科技大學</option>
-            <option value="中臺科技大學">中臺科技大學</option>
-            <option value="亞洲大學">亞洲大學</option>
-            <option value="僑光科技大學">僑光科技大學</option>
-          </select>
-        </div>
+                <div class="form-group">
+                    <label for="price-select">價位偏好</label>
+                    <select id="price-select">
+                        <option value="不限">選擇價位偏好 (預設不限)</option>
+                        <option value="100以下">100以下</option>
+                        <option value="100-200">100-200</option>
+                        <option value="200以上">200以上</option>
+                    </select>
+                </div>
 
-        <div class="form-group">
-          <label for="price-select">價位偏好</label>
-          <select id="price-select">
-            <option value="不限">選擇價位偏好 (預設不限)</option>
-            <option value="100以下">100以下</option>
-            <option value="100-200">100-200</option>
-            <option value="200以上">200以上</option>
-          </select>
-        </div>
+                <div class="form-group">
+                    <label for="distance-select">距離偏好</label>
+                    <select id="distance-select">
+                        <option value="不限">選擇距離偏好 (預設不限)</option>
+                        <option value="0-200公尺">0-200公尺</option>
+                        <option value="201-500公尺">201-500公尺</option>
+                        <option value="500公尺-1公里">500公尺-1公里</option>
+                        <option value="1公里以上">1公里以上</option>
+                    </select>
+                </div>
 
-        <div class="form-group">
-          <label for="distance-select">距離偏好</label>
-          <select id="distance-select">
-            <option value="不限">選擇距離偏好 (預設不限)</option>
-            <option value="0-200公尺">0-200公尺</option>
-            <option value="201-500公尺">201-500公尺</option>
-            <option value="500公尺-1公里">500公尺-1公里</option>
-            <option value="1公里以上">1公里以上</option>
-          </select>
-        </div>
+                <button type="submit" id="save-btn" class="btn" disabled>儲存設定</button>
+            </form>
+        </main>
 
-        <button type="submit" id="save-btn" class="btn" disabled>儲存設定</button>
-      </form>
-    </main>
-
-    <footer>
-      <div class="footer-container">
-        <img src="img/footer.png" alt="台中學霸美食地圖頁尾">
-        <div class="footer-text">
-          <span>關於我們的理念:<br>解決你每餐不知道要吃什麼的問題！</span>
-          <div class="contact-info">
-            <span>聯絡我們：<br><a href="mailto:minemoney2025@gmail.com">minemoney2025@gmail.com</a> <br> <a
-                href="tel:+886-403-0968213668">0968-213-668</a></span>
-          </div>
-        </div>
-      </div>
-    </footer>
-  </div>
-  <script src="script.js"></script>
+        <footer>
+            <div class="footer-container">
+                <img src="img/footer.png" alt="台中學霸美食地圖頁尾">
+                <div class="footer-text">
+                    <span>關於我們的理念:<br>解決你每餐不知道要吃什麼的問題！</span>
+                    <div class="contact-info">
+                        <span>聯絡我們：<br><a href="mailto:minemoney2025@gmail.com">minemoney2025@gmail.com</a> <br> <a href="tel:+886-403-0968213668">0968-213-668</a></span>
+                    </div>
+                </div>
+            </div> 
+        </footer>
+    </div>
+    <script src="script.js"></script>
 </body>
-
 </html>
