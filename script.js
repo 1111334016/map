@@ -1,4 +1,4 @@
-const LIFF_ID = "2011200610-smru4RvI";
+const LIFF_ID = "2011288416-9QX9xXhz";
 const GAS_WEB_APP_URL = "https://script.google.com/u/0/home/projects/10gc-4blw3LX5jbGFy24Md1HgIkVjDHc_rkjYjSQkf59qZW35lwJTaq2U/edit"; 
 
 document.addEventListener("DOMContentLoaded", function () {
