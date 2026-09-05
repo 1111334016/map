@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // 📌 GAS Web App URL
-    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbybPsM6jjhXRMFl0rZ8ntctPtqP1mJz2LXk8CufoQWO5lpjMHMiDjLT7n5DFnvwhjvVxQ/exec';
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzvZNkCy0Q-jhgo7yzgMCAjr8ap2ez4R8ZuxFJDYpGuN7Fzghc3ByrnrxAtG6eewnTSnw/exec';
     
     // 📌 LIFF ID
     const MY_LIFF_ID = '2011288416-9QX9xXhz'; 
