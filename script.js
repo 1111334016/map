@@ -152,16 +152,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateButtonState();
         }
     });
+// 前端即時計算並過濾選單資料
+function filterFrontendData(storeList, selectedDistance) {
+  const parseMeters = (str) => {
+    if (!str) return 0;
+    const num = parseFloat(str.replace(/[^0-9.]/g, ''));
+    return str.includes('公里') ? num * 1000 : num;
+  };
 
-    // 距離字串轉公尺數字範例
-function parseDistanceToMeters(distanceStr) {
-  if (!distanceStr) return 0;
-  
-  const num = parseFloat(distanceStr);
-  if (distanceStr.includes('公里')) {
-    return num * 1000;
-  }
-  return num; // 公尺直接回傳數字
+  const maxMeters = selectedDistance.includes('公里') 
+    ? parseInt(selectedDistance) * 1000 
+    : parseInt(selectedDistance) || Infinity;
+
+  return storeList.filter(store => parseMeters(store.距離) <= maxMeters);
 }
 
 // 範例輸出：
