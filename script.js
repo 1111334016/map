@@ -152,20 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateButtonState();
         }
     });
-// 前端即時計算並過濾選單資料
-function filterFrontendData(storeList, selectedDistance) {
-  const parseMeters = (str) => {
-    if (!str) return 0;
-    const num = parseFloat(str.replace(/[^0-9.]/g, ''));
-    return str.includes('公里') ? num * 1000 : num;
-  };
 
-  const maxMeters = selectedDistance.includes('公里') 
-    ? parseInt(selectedDistance) * 1000 
-    : parseInt(selectedDistance) || Infinity;
-
-  return storeList.filter(store => parseMeters(store.距離) <= maxMeters);
-}
 
 // 範例輸出：
 // "200公尺" -> 200
