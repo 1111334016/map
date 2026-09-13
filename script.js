@@ -498,128 +498,102 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function applySettings(settings) {
 
-    // 沒有之前的設定
-    if (!settings) {
 
-        schoolSelect.value = '';
+        // -----------------------------------------------------
+        // 第一次使用
+        // -----------------------------------------------------
 
-        updateCampusOptions();
+        if (!settings) {
 
-        priceSelect.value = '';
+            schoolSelect.value = '';
 
-        distanceSelect.value = '';
+            updateCampusOptions();
 
-        originalSettings = null;
+            priceSelect.value = '';
 
-        return;
-    }
+            distanceSelect.value = '';
 
+            originalSettings = null;
 
-    // =====================================================
-    // 將 GAS 回傳的「文字」
-    // 找到網頁下拉選單中對應的 option value
-    // =====================================================
+            return;
 
-    function findOptionValue(selectElement, text) {
-
-        if (!text) {
-            return '';
         }
 
-        const targetText = String(text).trim();
 
-        const option = Array.from(
-            selectElement.options
-        ).find(option => {
+        // -----------------------------------------------------
+        // 學校
+        // -----------------------------------------------------
 
-            return option.text.trim() === targetText;
+        schoolSelect.value =
+            settings.school || '';
 
-        });
 
-        return option ? option.value : '';
+        // -----------------------------------------------------
+        // 校區
+        // -----------------------------------------------------
+
+        updateCampusOptions(
+            settings.campus || ''
+        );
+
+
+        // -----------------------------------------------------
+        // 價位
+        // -----------------------------------------------------
+
+        if (
+            settings.price &&
+            [...priceSelect.options].some(
+                option =>
+                    option.value ===
+                    settings.price
+            )
+        ) {
+
+            priceSelect.value =
+                settings.price;
+
+        } else {
+
+            priceSelect.value = '';
+
+        }
+
+
+        // -----------------------------------------------------
+        // 距離
+        // -----------------------------------------------------
+
+        if (
+            settings.distance &&
+            [...distanceSelect.options].some(
+                option =>
+                    option.value ===
+                    settings.distance
+            )
+        ) {
+
+            distanceSelect.value =
+                settings.distance;
+
+        } else {
+
+            distanceSelect.value = '';
+
+        }
+
+
+        // 記錄目前設定
+        originalSettings =
+            getCurrentData();
+
+
+        console.log(
+            '已載入之前設定:',
+            originalSettings
+        );
+
     }
-
-
-    // =====================================================
-    // 1. 恢復學校
-    // =====================================================
-
-    // GAS 回傳的是：
-    // 「國立中興大學」
-    //
-    // 網頁 option value 可能是：
-    // 「school1」
-    //
-    // 所以先用文字找到正確的 value
-
-    const schoolValue =
-        findOptionValue(
-            schoolSelect,
-            settings.school
-        );
-
-
-    schoolSelect.value =
-        schoolValue;
-
-
-    // =====================================================
-    // 2. 根據學校建立校區
-    // =====================================================
-
-    updateCampusOptions(
-        settings.campus || ''
-    );
-
-
-    // =====================================================
-    // 3. 恢復價位
-    // =====================================================
-
-    const priceValue =
-        findOptionValue(
-            priceSelect,
-            settings.price
-        );
-
-
-    priceSelect.value =
-        priceValue;
-
-
-    // =====================================================
-    // 4. 恢復距離
-    // =====================================================
-
-    const distanceValue =
-        findOptionValue(
-            distanceSelect,
-            settings.distance
-        );
-
-
-    distanceSelect.value =
-        distanceValue;
-
-
-    // =====================================================
-    // 記錄載入完成後的設定
-    // =====================================================
-
-    originalSettings =
-        getCurrentData();
-
-
-    console.log(
-        '✅ 已從 GAS 載入之前的設定：',
-        settings
-    );
-
-    console.log(
-        '✅ 網頁目前顯示的設定：',
-        originalSettings
-    );
-}
 
 
     // =========================================================
